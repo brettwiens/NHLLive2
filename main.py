@@ -495,8 +495,8 @@ def check_nhl():
                     stHomeScore.title(nhl_simple[game_pk]['HomeTeam'] + " - " + str(nhl_simple[game_pk]['HomeScore']))
                     stAwayScore.title(nhl_simple[game_pk]['AwayTeam'] + " - " + str(nhl_simple[game_pk]['AwayScore']))
 
-                    stHomeLogo.image(Image.open('H:/NHLLive2/TeamLogos/' + TeamIndex.get(nhl_simple[game_pk]['HomeTeam'])))
-                    stAwayLogo.image(Image.open('H:/NHLLive2/TeamLogos/' + TeamIndex.get(nhl_simple[game_pk]['AwayTeam'])))
+                    stHomeLogo.image(Image.open('./TeamLogos/' + TeamIndex.get(nhl_simple[game_pk]['HomeTeam'])))
+                    stAwayLogo.image(Image.open('./TeamLogos/' + TeamIndex.get(nhl_simple[game_pk]['AwayTeam'])))
 
                     stHomeShots.subheader("Shots " + str(nhl_simple[game_pk]['HomeShots']))
                     stAwayShots.subheader("Shots " + str(nhl_simple[game_pk]['AwayShots']))
