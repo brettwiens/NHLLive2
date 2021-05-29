@@ -5,7 +5,3 @@ requests
 matplotlib
 pillow
 seaborn
-tables
-tqdm
-tensorflow
-keras
