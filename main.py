@@ -450,35 +450,35 @@ def check_nhl():
                             LastPlay4['Description'] = ""
                             LastPlay5['Description'] = ""
                         elif PlayCount == 1:
-                            LastPlay1 = (game_plays[game_pk][PlayCount - 0])
+                            LastPlay1 = (game_plays[game_pk][PlayCount - 1])
                             LastPlay2['Description'] = ""
                             LastPlay3['Description'] = ""
                             LastPlay4['Description'] = ""
                             LastPlay5['Description'] = ""
                         elif PlayCount == 2:
-                            LastPlay1 = (game_plays[game_pk][PlayCount - 0])
-                            LastPlay2 = (game_plays[game_pk][PlayCount - 1])
+                            LastPlay1 = (game_plays[game_pk][PlayCount - 1])
+                            LastPlay2 = (game_plays[game_pk][PlayCount - 2])
                             LastPlay3['Description'] = ""
                             LastPlay4['Description'] = ""
                             LastPlay5['Description'] = ""
                         elif PlayCount == 3:
-                            LastPlay1 = (game_plays[game_pk][PlayCount - 0])
-                            LastPlay2 = (game_plays[game_pk][PlayCount - 1])
-                            LastPlay3 = (game_plays[game_pk][PlayCount - 2])
+                            LastPlay1 = (game_plays[game_pk][PlayCount - 1])
+                            LastPlay2 = (game_plays[game_pk][PlayCount - 2])
+                            LastPlay3 = (game_plays[game_pk][PlayCount - 3])
                             LastPlay4['Description'] = ""
                             LastPlay5['Description'] = ""
                         elif PlayCount == 4:
-                            LastPlay1 = (game_plays[game_pk][PlayCount - 0])
-                            LastPlay2 = (game_plays[game_pk][PlayCount - 1])
-                            LastPlay3 = (game_plays[game_pk][PlayCount - 2])
-                            LastPlay4 = (game_plays[game_pk][PlayCount - 3])
+                            LastPlay1 = (game_plays[game_pk][PlayCount - 1])
+                            LastPlay2 = (game_plays[game_pk][PlayCount - 2])
+                            LastPlay3 = (game_plays[game_pk][PlayCount - 3])
+                            LastPlay4 = (game_plays[game_pk][PlayCount - 4])
                             LastPlay5['Description'] = ""
                         else:
-                            LastPlay1 = (game_plays[game_pk][PlayCount - 0])
-                            LastPlay2 = (game_plays[game_pk][PlayCount - 1])
-                            LastPlay3 = (game_plays[game_pk][PlayCount - 2])
-                            LastPlay4 = (game_plays[game_pk][PlayCount - 3])
-                            LastPlay5 = (game_plays[game_pk][PlayCount - 4])
+                            LastPlay1 = (game_plays[game_pk][PlayCount - 1])
+                            LastPlay2 = (game_plays[game_pk][PlayCount - 2])
+                            LastPlay3 = (game_plays[game_pk][PlayCount - 3])
+                            LastPlay4 = (game_plays[game_pk][PlayCount - 4])
+                            LastPlay5 = (game_plays[game_pk][PlayCount - 5])
 
                         stLastPlay1.text(LastPlay1['Description'])
                         stLastPlay2.text(LastPlay2['Description'])
