@@ -17,6 +17,7 @@ import seaborn as sns
 MAX_DELAY = int(os.getenv('MAX_DELAY', 10))
 MIN_DELAY = int(os.getenv('MIN_DELAY', 10))
 
+
 NHL = os.getenv('NHL', 'true').lower() == 'true'
 
 st.set_page_config(layout='wide')
@@ -63,23 +64,27 @@ col1, col2, col3 = st.beta_columns(3)
 with col1:
     stGameStatus = st.empty()
 with col2:
+    stPeriod = st.empty()
     stGameTime = st.empty()
+    stPPCheck = st.empty()
 with col3:
     stVenue = st.empty()
 
-st.write("-=-=-=-")
+# st.write("-=-=-=-")
 col1, col2, col3, col4 = st.beta_columns((1, 2, 1, 2))
 with col1:
     stHomeLogo = st.empty()
 with col2:
     stHomeScore = st.empty()
+    stHomeTeam = st.empty()
     stHomeShots = st.empty()
 with col3:
     stAwayLogo = st.empty()
 with col4:
     stAwayScore = st.empty()
+    stAwayTeam = st.empty()
     stAwayShots = st.empty()
-stPPCheck = st.empty()
+
 st.write("-=-=-=-")
 col1, col2 = st.beta_columns(2)
 with col1:
@@ -355,8 +360,9 @@ def check_nhl():
             print(game['teams']['home']['team']['name'])
             print(TeamPicker)
             if game['teams']['away']['team']['name'] == TeamPicker or game['teams']['home']['team']['name'] == TeamPicker:
-                print("----------------------")
+                # print("----------------------")
                 game_pk = game['gamePk']
+                # print(game_pk)
                 game_date = dateutil.parser.parse(game['gameDate'])
                 live_feed = 'https://statsapi.web.nhl.com' + game['link']
                 HomeShots = 0
@@ -388,7 +394,8 @@ def check_nhl():
                         "Date": game_date,
                         "Status": game['status']['detailedState'],
                         "Venue": game['venue']['name'],
-                        "Time": game['gameDate']
+                        "Time": game['linescore']['currentPeriodTimeRemaining'],
+                        "Period": game['linescore']['currentPeriodOrdinal']
                     }
 
                     # nhl_games[game_pk].game_status = game['status']['abstractGameState']
@@ -492,9 +499,11 @@ def check_nhl():
 
                     stGameStatus.subheader(nhl_simple[game_pk]['Status'])
 
-                    stHomeScore.title(nhl_simple[game_pk]['HomeTeam'] + " - " + str(nhl_simple[game_pk]['HomeScore']))
-                    stAwayScore.title(nhl_simple[game_pk]['AwayTeam'] + " - " + str(nhl_simple[game_pk]['AwayScore']))
+                    stHomeScore.title(str(nhl_simple[game_pk]['HomeScore']))
+                    stAwayScore.title(str(nhl_simple[game_pk]['AwayScore']))
 
+                    stHomeTeam.header(nhl_simple[game_pk]['HomeTeam'])
+                    stAwayTeam.header(nhl_simple[game_pk]['AwayTeam'])
                     stHomeLogo.image(Image.open('./TeamLogos/' + TeamIndex.get(nhl_simple[game_pk]['HomeTeam'])))
                     stAwayLogo.image(Image.open('./TeamLogos/' + TeamIndex.get(nhl_simple[game_pk]['AwayTeam'])))
 
@@ -503,15 +512,18 @@ def check_nhl():
 
                     if nhl_simple[game_pk]['Status'] == 'In Progress':
                         if nhl_simple[game_pk]['HomePowerPlay']:
-                            stPPCheck.header(nhl_simple[game_pk]['HomeTeam'] + " Power Play")
+                            stPPCheck.subheader(nhl_simple[game_pk]['HomeTeam'] + " Power Play")
                         elif nhl_simple[game_pk]['AwayPowerPlay']:
-                            stPPCheck.header(nhl_simple[game_pk]['AwayTeam'] + " Power Play")
+                            stPPCheck.subheader(nhl_simple[game_pk]['AwayTeam'] + " Power Play")
                         else:
-                            stPPCheck.header("Even Strength")
+                            stPPCheck.subheader("Even Strength")
                     else:
-                        stPPCheck.header("")
+                        stPPCheck.subheader("")
 
-                    stGameTime.text("UTC Time: " + nhl_simple[game_pk]['Time'])
+                    # stPeriod.header(nhl_simple[game_pk]['Period'] + " Period")
+                    stPeriod.markdown("<h1 style='text-align: center; color: red;'>" + nhl_simple[game_pk]['Period'] + " Period" + "</h1>", unsafe_allow_html=True)
+                    stGameTime.header(nhl_simple[game_pk]['Time'])
+                    stGameTime.markdown("<h3 style='text-align: center; color: white;'>" + nhl_simple[game_pk]['Time'] + "</h3>", unsafe_allow_html=True)
                     stVenue.subheader(nhl_simple[game_pk]['Venue'])
                     #
         for k in list(nhl_games.keys()):
