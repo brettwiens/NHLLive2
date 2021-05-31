@@ -13,6 +13,7 @@ import matplotlib
 import matplotlib.pyplot as plt
 from PIL import Image
 import seaborn as sns
+import numpy as np
 
 MAX_DELAY = int(os.getenv('MAX_DELAY', 10))
 MIN_DELAY = int(os.getenv('MIN_DELAY', 10))
@@ -21,89 +22,6 @@ st.set_page_config(layout='wide')
 st.sidebar.header("Select Team")
 
 NHL = os.getenv('NHL', 'true').lower() == 'true'
-
-st.title("Game Statistics - Mini Skorboard")
-
-GoStatus = False
-
-stTeamPicker = st.sidebar.selectbox(label="Select Team:", options=('Anaheim Ducks',
-                                                                   'Arizona Coyotes',
-                                                                   'Boston Bruins',
-                                                                   'Buffalo Sabres',
-                                                                   'Carolina Hurricanes',
-                                                                   'Columbus Blue Jackets',
-                                                                   'Calgary Flames',
-                                                                   'Chicago Blackhawks',
-                                                                   'Colorado Avalanche',
-                                                                   'Dallas Stars',
-                                                                   'Detroit Red Wings',
-                                                                   'Edmonton Oilers',
-                                                                   'Florida Panthers',
-                                                                   'Los Angeles Kings',
-                                                                   'Minnesota Wild',
-                                                                   'Montréal Canadiens',
-                                                                   'New Jersey Devils',
-                                                                   'Nashville Predators',
-                                                                   'New York Islanders',
-                                                                   'New York Rangers',
-                                                                   'Ottawa Senators',
-                                                                   'Philadelphia Flyers',
-                                                                   'Pittsburgh Penguins',
-                                                                   'San Jose Sharks',
-                                                                   'St. Louis Blues',
-                                                                   'Tampa Bay Lightning',
-                                                                   'Toronto Maple Leafs',
-                                                                   'Vancouver Canucks',
-                                                                   'Vegas Golden Knights',
-                                                                   'Winnipeg Jets',
-                                                                   'Washington Capitals'))
-print(stTeamPicker)
-stGoButton = st.sidebar.button("Start")
-
-if stGoButton:
-    if GoStatus == False:
-        GoStatus = True
-    else:
-        GoStatus = False
-
-# stContinueCheck = st.sidebar.checkbox("Stop")
-st.write()
-st.markdown("---")
-col1, col2, col3 = st.beta_columns(3)
-with col1:
-    stGameStatus = st.empty()
-with col2:
-    stPeriod = st.empty()
-    stGameTime = st.empty()
-    stPPCheck = st.empty()
-with col3:
-    stVenue = st.empty()
-
-# st.write("-=-=-=-")
-col1, col2, col3, col4 = st.beta_columns((1, 2, 1, 2))
-with col1:
-    stHomeLogo = st.empty()
-with col2:
-    stHomeScore = st.empty()
-    stHomeTeam = st.empty()
-    stHomeShots = st.empty()
-with col3:
-    stAwayLogo = st.empty()
-with col4:
-    stAwayScore = st.empty()
-    stAwayTeam = st.empty()
-    stAwayShots = st.empty()
-
-st.markdown("---")
-col1, col2 = st.beta_columns(2)
-with col1:
-    stLastPlay1 = st.empty()
-    stLastPlay2 = st.empty()
-    stLastPlay3 = st.empty()
-    stLastPlay4 = st.empty()
-    stLastPlay5 = st.empty()
-with col2:
-    stArena1 = st.empty()
 
 
 class NHLGame:
@@ -128,17 +46,32 @@ class NHLGame:
 
 
 def IceMaker(StatFrame):
-    StatTable = StatFrame[['X', 'Y']]
-    StatTable = StatTable.groupby(["X", "Y"]).size().reset_index(name="Freq")
+    x_co = []
+    for x_tuple in StatFrame['Xco']:
+        x_co.append(int(str(x_tuple[0])))
 
-    x = StatTable['X']
-    y = StatTable['Y']
-    for index, value in x.items():
-        if x[index] < 0:
-            x[index] = -x[index]
-            y[index] = -y[index]
+    y_co = []
+    for y_tuple in StatFrame['Yco']:
+        y_co.append(int(str(y_tuple[0])))
 
-    freq = StatTable['Freq']
+    # StatTable = StatFrame[['X', 'Y']]
+    # StatTable = StatTable.groupby(["X", "Y"]).size().reset_index(name="Freq")
+    #
+    # x = StatTable['X']
+    # y = StatTable['Y']
+
+    x = (x_co)
+    y = (y_co)
+
+    print(x)
+    print(y)
+
+    # for index, value in x.items():
+    #     if x[index] < 0:
+    #         x[index] = -x[index]
+    #         y[index] = -y[index]
+    #
+    # freq = StatTable['Freq']
     sns.set()
     fig, ax = plt.subplots(frameon=True)
 
@@ -151,8 +84,11 @@ def IceMaker(StatFrame):
     plt.imshow(img, extent=ax_extent)
 
     sns.set_style("white")
-    ax = sns.kdeplot(x=x, y=y, cmap="icefire", fill=True, thresh=0.05, levels=100, zorder=2, alpha=0.5)
-    sns.scatterplot(x=x, y=y, s=50, alpha=1, hue=freq, palette="dark:salmon_r")
+    # ax = sns.kdeplot(x=x, y=y, cmap="icefire", fill=True, thresh=0.05, levels=100, zorder=2, alpha=0.5)
+    # sns.scatterplot(x=x, y=y, s=50, alpha=1, hue=freq, palette="dark:salmon_r")
+    sns.scatterplot(x=x, y=y, s=50, alpha=1, palette="dark:salmon_r")
+    sns.scatterplot(x=x, y=y, s=500, alpha=0.4, palette="dark:salmon_r")
+
     ax.set_facecolor("white")
     fig.patch.set_facecolor("white")
     fig.patch.set_alpha(0.0)  # Remove the labelling of axes
@@ -328,6 +264,101 @@ class Team:
     #         print('started end timer for ' + str(end) + ' seconds')
 
 
+ToplineString = "Today's Games:  "
+with urllib.request.urlopen(
+        'https://statsapi.web.nhl.com/api/v1/schedule?expand=schedule.linescore') as response:
+    raw_json = response.read().decode('utf8')
+json_data = json.loads(raw_json)
+for game in json_data['dates'][0]['games']:
+    # print(game['teams']['away']['team']['name'])
+    # print(game['teams']['home']['team']['name'])
+    # print(stTeamPicker)
+    ToplineString = ToplineString + NHLTeams.team_dict[str(game['teams']['away']['team']['name'])] + " vs. " + NHLTeams.team_dict[str(game['teams']['home']['team']['name'])] + "   "
+st.text(ToplineString)
+
+st.title("Game Statistics - Mini Skorboard")
+
+GoStatus = False
+
+stTeamPicker = st.sidebar.selectbox(label="Select Team:", options=('Anaheim Ducks',
+                                                                   'Arizona Coyotes',
+                                                                   'Boston Bruins',
+                                                                   'Buffalo Sabres',
+                                                                   'Carolina Hurricanes',
+                                                                   'Columbus Blue Jackets',
+                                                                   'Calgary Flames',
+                                                                   'Chicago Blackhawks',
+                                                                   'Colorado Avalanche',
+                                                                   'Dallas Stars',
+                                                                   'Detroit Red Wings',
+                                                                   'Edmonton Oilers',
+                                                                   'Florida Panthers',
+                                                                   'Los Angeles Kings',
+                                                                   'Minnesota Wild',
+                                                                   'Montréal Canadiens',
+                                                                   'New Jersey Devils',
+                                                                   'Nashville Predators',
+                                                                   'New York Islanders',
+                                                                   'New York Rangers',
+                                                                   'Ottawa Senators',
+                                                                   'Philadelphia Flyers',
+                                                                   'Pittsburgh Penguins',
+                                                                   'San Jose Sharks',
+                                                                   'St. Louis Blues',
+                                                                   'Tampa Bay Lightning',
+                                                                   'Toronto Maple Leafs',
+                                                                   'Vancouver Canucks',
+                                                                   'Vegas Golden Knights',
+                                                                   'Winnipeg Jets',
+                                                                   'Washington Capitals'))
+print(stTeamPicker)
+stGoButton = st.sidebar.button("Start")
+
+if stGoButton:
+    if GoStatus == False:
+        GoStatus = True
+    else:
+        GoStatus = False
+
+# stContinueCheck = st.sidebar.checkbox("Stop")
+st.write()
+st.markdown("---")
+col1, col2, col3 = st.beta_columns(3)
+with col1:
+    stGameStatus = st.empty()
+with col2:
+    stPeriod = st.empty()
+    stGameTime = st.empty()
+    stPPCheck = st.empty()
+with col3:
+    stVenue = st.empty()
+
+# st.write("-=-=-=-")
+col1, col2, col3, col4 = st.beta_columns((1, 2, 1, 2))
+with col1:
+    stHomeLogo = st.empty()
+with col2:
+    stHomeScore = st.empty()
+    stHomeTeam = st.empty()
+    stHomeShots = st.empty()
+with col3:
+    stAwayLogo = st.empty()
+with col4:
+    stAwayScore = st.empty()
+    stAwayTeam = st.empty()
+    stAwayShots = st.empty()
+
+st.markdown("---")
+col1, col2 = st.beta_columns(2)
+with col1:
+    stLastPlay1 = st.empty()
+    stLastPlay2 = st.empty()
+    stLastPlay3 = st.empty()
+    stLastPlay4 = st.empty()
+    stLastPlay5 = st.empty()
+with col2:
+    stArena1 = st.empty()
+
 nhl_games = dict()
 nhl_simple = dict()
 
@@ -364,7 +395,6 @@ TeamIndex = {
     'Washington Capitals': 'WSH3.png',
     'Winnipeg Jets': 'WPG3.png',
 }
-
 
 def check_nhl():
     # print("checking nhl")
@@ -443,7 +473,7 @@ def check_nhl():
                     game_plays[game_pk] = {}
                     for Play in live_feed_json['liveData']['plays']['allPlays']:
                         if 'x' in Play['coordinates']:
-                            X_coord = Play['coordinates']['x']
+                            x_coord = Play['coordinates']['x']
                         else:
                             x_coord = 0
                         if 'y' in Play['coordinates']:
@@ -459,59 +489,105 @@ def check_nhl():
 
                         game_plays[game_pk][PlayCount]["Description"] = Play['result']['description']
                         game_plays[game_pk][PlayCount]["Event"] = Play['result']['event']
-                        game_plays[game_pk][PlayCount]["X"] = x_coord,
-                        game_plays[game_pk][PlayCount]["Y"] = y_coord,
+                        game_plays[game_pk][PlayCount]["X"] = int(x_coord),
+                        game_plays[game_pk][PlayCount]["Y"] = int(y_coord),
                         game_plays[game_pk][PlayCount]["Team"] = TeamCode,
                         game_plays[game_pk][PlayCount]["Period"] = Play['about']['period'],
                         game_plays[game_pk][PlayCount]["Time"] = Play['about']['periodTimeRemaining']
 
                         PlayCount += 1
 
-                        LastPlay1 = dict()
-                        LastPlay2 = dict()
-                        LastPlay3 = dict()
-                        LastPlay4 = dict()
-                        LastPlay5 = dict()
+                    LastPlay1 = dict()
+                    LastPlay2 = dict()
+                    LastPlay3 = dict()
+                    LastPlay4 = dict()
+                    LastPlay5 = dict()
 
-                        ## Initialize Descriptions
-                        LastPlay1['Description'] = ""
-                        LastPlay2['Description'] = ""
-                        LastPlay3['Description'] = ""
-                        LastPlay4['Description'] = ""
-                        LastPlay5['Description'] = ""
-                        LastPlay1['Event'] = ""
-                        LastPlay2['Event'] = ""
-                        LastPlay3['Event'] = ""
-                        LastPlay4['Event'] = ""
-                        LastPlay5['Event'] = ""
-                        LastPlay1['Time'] = ""
-                        LastPlay2['Time'] = ""
-                        LastPlay3['Time'] = ""
-                        LastPlay4['Time'] = ""
-                        LastPlay5['Time'] = ""
+                    ## Initialize Descriptions
+                    LastPlay1['Description'] = ""
+                    LastPlay2['Description'] = ""
+                    LastPlay3['Description'] = ""
+                    LastPlay4['Description'] = ""
+                    LastPlay5['Description'] = ""
+                    LastPlay1['Event'] = ""
+                    LastPlay2['Event'] = ""
+                    LastPlay3['Event'] = ""
+                    LastPlay4['Event'] = ""
+                    LastPlay5['Event'] = ""
+                    LastPlay1['Time'] = ""
+                    LastPlay2['Time'] = ""
+                    LastPlay3['Time'] = ""
+                    LastPlay4['Time'] = ""
+                    LastPlay5['Time'] = ""
 
-                        if PlayCount == 0:
-                            LastPlay1['Description'] = "Game Not Started"
-                        elif PlayCount == 1:
-                            LastPlay1 = (game_plays[game_pk][PlayCount - 1])
-                        elif PlayCount == 2:
-                            LastPlay1 = (game_plays[game_pk][PlayCount - 1])
-                            LastPlay2 = (game_plays[game_pk][PlayCount - 2])
-                        elif PlayCount == 3:
-                            LastPlay1 = (game_plays[game_pk][PlayCount - 1])
-                            LastPlay2 = (game_plays[game_pk][PlayCount - 2])
-                            LastPlay3 = (game_plays[game_pk][PlayCount - 3])
-                        elif PlayCount == 4:
-                            LastPlay1 = (game_plays[game_pk][PlayCount - 1])
-                            LastPlay2 = (game_plays[game_pk][PlayCount - 2])
-                            LastPlay3 = (game_plays[game_pk][PlayCount - 3])
-                            LastPlay4 = (game_plays[game_pk][PlayCount - 4])
-                        else:
-                            LastPlay1 = (game_plays[game_pk][PlayCount - 1])
-                            LastPlay2 = (game_plays[game_pk][PlayCount - 2])
-                            LastPlay3 = (game_plays[game_pk][PlayCount - 3])
-                            LastPlay4 = (game_plays[game_pk][PlayCount - 4])
-                            LastPlay5 = (game_plays[game_pk][PlayCount - 5])
+                    if PlayCount == 0:
+                        LastPlay1['Description'] = "Game Not Started"
+                    elif PlayCount == 1:
+                        LastPlay1 = game_plays[game_pk][PlayCount - 1]
+                    elif PlayCount == 2:
+                        LastPlay1 = game_plays[game_pk][PlayCount - 1]
+                        LastPlay2 = game_plays[game_pk][PlayCount - 2]
+                    elif PlayCount == 3:
+                        LastPlay1 = game_plays[game_pk][PlayCount - 1]
+                        LastPlay2 = game_plays[game_pk][PlayCount - 2]
+                        LastPlay3 = game_plays[game_pk][PlayCount - 3]
+                    elif PlayCount == 4:
+                        LastPlay1 = game_plays[game_pk][PlayCount - 1]
+                        LastPlay2 = game_plays[game_pk][PlayCount - 2]
+                        LastPlay3 = game_plays[game_pk][PlayCount - 3]
+                        LastPlay4 = game_plays[game_pk][PlayCount - 4]
+                    elif PlayCount == 5:
+                        LastPlay1 = game_plays[game_pk][PlayCount - 1]
+                        LastPlay2 = game_plays[game_pk][PlayCount - 2]
+                        LastPlay3 = game_plays[game_pk][PlayCount - 3]
+                        LastPlay4 = game_plays[game_pk][PlayCount - 4]
+                        LastPlay5 = game_plays[game_pk][PlayCount - 5]
+                    elif PlayCount == 6:
+                        LastPlay1 = game_plays[game_pk][PlayCount - 1]
+                        LastPlay2 = game_plays[game_pk][PlayCount - 2]
+                        LastPlay3 = game_plays[game_pk][PlayCount - 3]
+                        LastPlay4 = game_plays[game_pk][PlayCount - 4]
+                        LastPlay5 = game_plays[game_pk][PlayCount - 5]
+                        LastPlay6 = game_plays[game_pk][PlayCount - 6]
+                    elif PlayCount == 7:
+                        LastPlay1 = game_plays[game_pk][PlayCount - 1]
+                        LastPlay2 = game_plays[game_pk][PlayCount - 2]
+                        LastPlay3 = game_plays[game_pk][PlayCount - 3]
+                        LastPlay4 = game_plays[game_pk][PlayCount - 4]
+                        LastPlay5 = game_plays[game_pk][PlayCount - 5]
+                        LastPlay6 = game_plays[game_pk][PlayCount - 6]
+                        LastPlay7 = game_plays[game_pk][PlayCount - 7]
+                    elif PlayCount == 8:
+                        LastPlay1 = game_plays[game_pk][PlayCount - 1]
+                        LastPlay2 = game_plays[game_pk][PlayCount - 2]
+                        LastPlay3 = game_plays[game_pk][PlayCount - 3]
+                        LastPlay4 = game_plays[game_pk][PlayCount - 4]
+                        LastPlay5 = game_plays[game_pk][PlayCount - 5]
+                        LastPlay6 = game_plays[game_pk][PlayCount - 6]
+                        LastPlay7 = game_plays[game_pk][PlayCount - 7]
+                        LastPlay8 = game_plays[game_pk][PlayCount - 8]
+                    elif PlayCount == 9:
+                        LastPlay1 = game_plays[game_pk][PlayCount - 1]
+                        LastPlay2 = game_plays[game_pk][PlayCount - 2]
+                        LastPlay3 = game_plays[game_pk][PlayCount - 3]
+                        LastPlay4 = game_plays[game_pk][PlayCount - 4]
+                        LastPlay5 = game_plays[game_pk][PlayCount - 5]
+                        LastPlay6 = game_plays[game_pk][PlayCount - 6]
+                        LastPlay7 = game_plays[game_pk][PlayCount - 7]
+                        LastPlay8 = game_plays[game_pk][PlayCount - 8]
+                        LastPlay9 = game_plays[game_pk][PlayCount - 9]
+                    else:
+                        LastPlay1 = game_plays[game_pk][PlayCount - 1]
+                        LastPlay2 = game_plays[game_pk][PlayCount - 2]
+                        LastPlay3 = game_plays[game_pk][PlayCount - 3]
+                        LastPlay4 = game_plays[game_pk][PlayCount - 4]
+                        LastPlay5 = game_plays[game_pk][PlayCount - 5]
+                        LastPlay6 = game_plays[game_pk][PlayCount - 6]
+                        LastPlay7 = game_plays[game_pk][PlayCount - 7]
+                        LastPlay8 = game_plays[game_pk][PlayCount - 8]
+                        LastPlay9 = game_plays[game_pk][PlayCount - 9]
+                        LastPlay10 = game_plays[game_pk][PlayCount - 10]
+
 
                     stLastPlay1.text(LastPlay1['Time'] + " " + LastPlay1['Event'] + ": " + LastPlay1['Description'])
                     stLastPlay2.text(LastPlay2['Time'] + " " + LastPlay2['Event'] + ": " + LastPlay2['Description'])
@@ -522,8 +598,20 @@ def check_nhl():
                     # Create Pandas DataFrame of Recent Events
 
                     ######## WORK HERE, CREATE NUMPY ARRAY WITH INFORMATION FOR THE ICEMAKER
+                    PlayFrame = {'Play': ["Last Play", "2nd Last Play", "3rd Last Play", "4th Last Play", "5th Last Play", "6th Last Play", "7th Last Play", "8th Last Play", "9th Last Play", "10th Last Play"],
+                                 'Time': [LastPlay1['Time'], LastPlay2['Time'], LastPlay3['Time'], LastPlay4['Time'], LastPlay5['Time'], LastPlay6['Time'], LastPlay7['Time'], LastPlay8['Time'], LastPlay9['Time'], LastPlay10['Time']],
+                                 'Event': [LastPlay1['Event'], LastPlay2['Event'], LastPlay3['Event'], LastPlay4['Event'], LastPlay5['Event'], LastPlay6['Event'], LastPlay7['Event'], LastPlay8['Event'], LastPlay9['Event'], LastPlay10['Event']],
+                                 'Xco': [LastPlay1['X'], LastPlay2['X'], LastPlay3['X'], LastPlay4['X'], LastPlay5['X'], LastPlay6['X'], LastPlay7['X'], LastPlay8['X'], LastPlay9['X'], LastPlay10['X']],
+                                 'Yco': [LastPlay1['Y'], LastPlay2['Y'], LastPlay3['Y'], LastPlay4['Y'], LastPlay5['Y'], LastPlay6['Y'], LastPlay7['Y'], LastPlay8['Y'], LastPlay9['Y'], LastPlay10['Y']]
+                    }
 
-                    # stArena1.pyplot(IceMaker([0, 0]))
+                    # PlayFrame = np.array([[LastPlay1['Time'],LastPlay1['Event'],LastPlay1['X'],LastPlay1['Y']],
+                    #                      [LastPlay2['Time'],LastPlay2['Event'],LastPlay2['X'],LastPlay2['Y']],
+                    #                      [LastPlay3['Time'],LastPlay3['Event'],LastPlay3['X'],LastPlay3['Y']],
+                    #                      [LastPlay4['Time'],LastPlay4['Event'],LastPlay4['X'],LastPlay4['Y']],
+                    #                      [LastPlay5['Time'],LastPlay5['Event'],LastPlay5['X'],LastPlay5['Y']]])
+
+                    stArena1.pyplot(IceMaker(PlayFrame))
 
                     stGameStatus.subheader(nhl_simple[game_pk]['Status'])
 
@@ -571,7 +659,6 @@ def check_nhl():
         print('Exception', e)
         traceback.print_exc()
         return MIN_DELAY
-
 
 if stGoButton:
     while GoStatus:
