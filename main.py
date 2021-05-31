@@ -274,6 +274,7 @@ class Team:
 
 
 ToplineString = "Today's Games:  "
+PlayingTeamList = []
 with urllib.request.urlopen(
         'https://statsapi.web.nhl.com/api/v1/schedule?expand=schedule.linescore') as response:
     raw_json = response.read().decode('utf8')
@@ -283,43 +284,48 @@ for game in json_data['dates'][0]['games']:
     # print(game['teams']['home']['team']['name'])
     # print(stTeamPicker)
     ToplineString = ToplineString + NHLTeams.team_dict[str(game['teams']['away']['team']['name'])] + " vs. " + NHLTeams.team_dict[str(game['teams']['home']['team']['name'])] + "   "
+    PlayingTeamList = PlayingTeamList + [str(game['teams']['home']['team']['name'])]
+    PlayingTeamList = PlayingTeamList + [str(game['teams']['away']['team']['name'])]
 st.text(ToplineString)
+st.text(PlayingTeamList)
 
 st.title("Game Statistics - Mini Skorboard")
 
 GoStatus = False
 
-stTeamPicker = st.sidebar.selectbox(label="Select Team:", options=('Anaheim Ducks',
-                                                                   'Arizona Coyotes',
-                                                                   'Boston Bruins',
-                                                                   'Buffalo Sabres',
-                                                                   'Carolina Hurricanes',
-                                                                   'Columbus Blue Jackets',
-                                                                   'Calgary Flames',
-                                                                   'Chicago Blackhawks',
-                                                                   'Colorado Avalanche',
-                                                                   'Dallas Stars',
-                                                                   'Detroit Red Wings',
-                                                                   'Edmonton Oilers',
-                                                                   'Florida Panthers',
-                                                                   'Los Angeles Kings',
-                                                                   'Minnesota Wild',
-                                                                   'Montréal Canadiens',
-                                                                   'New Jersey Devils',
-                                                                   'Nashville Predators',
-                                                                   'New York Islanders',
-                                                                   'New York Rangers',
-                                                                   'Ottawa Senators',
-                                                                   'Philadelphia Flyers',
-                                                                   'Pittsburgh Penguins',
-                                                                   'San Jose Sharks',
-                                                                   'St. Louis Blues',
-                                                                   'Tampa Bay Lightning',
-                                                                   'Toronto Maple Leafs',
-                                                                   'Vancouver Canucks',
-                                                                   'Vegas Golden Knights',
-                                                                   'Winnipeg Jets',
-                                                                   'Washington Capitals'))
+stTeamPicker = st.sidebar.selectbox(label="Select Team:", options=(PlayingTeamList))
+# stTeamPicker = st.sidebar.selectbox(label="Select Team:", options=('Anaheim Ducks',
+#                                                                    'Arizona Coyotes',
+#                                                                    'Boston Bruins',
+#                                                                    'Buffalo Sabres',
+#                                                                    'Carolina Hurricanes',
+#                                                                    'Columbus Blue Jackets',
+#                                                                    'Calgary Flames',
+#                                                                    'Chicago Blackhawks',
+#                                                                    'Colorado Avalanche',
+#                                                                    'Dallas Stars',
+#                                                                    'Detroit Red Wings',
+#                                                                    'Edmonton Oilers',
+#                                                                    'Florida Panthers',
+#                                                                    'Los Angeles Kings',
+#                                                                    'Minnesota Wild',
+#                                                                    'Montréal Canadiens',
+#                                                                    'New Jersey Devils',
+#                                                                    'Nashville Predators',
+#                                                                    'New York Islanders',
+#                                                                    'New York Rangers',
+#                                                                    'Ottawa Senators',
+#                                                                    'Philadelphia Flyers',
+#                                                                    'Pittsburgh Penguins',
+#                                                                    'San Jose Sharks',
+#                                                                    'St. Louis Blues',
+#                                                                    'Tampa Bay Lightning',
+#                                                                    'Toronto Maple Leafs',
+#                                                                    'Vancouver Canucks',
+#                                                                    'Vegas Golden Knights',
+#                                                                    'Winnipeg Jets',
+#                                                                    'Washington Capitals'))
+
 print(stTeamPicker)
 stGoButton = st.sidebar.button("Start")
 
@@ -443,6 +449,16 @@ def check_nhl():
                                                  game['linescore']['teams']['home']['powerPlay'],
                                                  game['linescore']['teams']['away']['powerPlay'],
                                                  game_date)
+
+                    if 'currentPeriodTimeRemaining' in game['linescore']:
+                        PeriodTime = game['linescore']['currentPeriodTimeRemaining']
+                        PeriodOrdinal = game['linescore']['currentPeriodOrdinal']
+                    else:
+                        PeriodTime = "PreGame"
+                        PeriodOrdinal = "PreGame"
+
+                    st.write(PeriodTime)
+
                     nhl_simple[game_pk] = {
                         "HomeTeam": game['teams']['home']['team']['name'],
                         "AwayTeam": game['teams']['away']['team']['name'],
@@ -455,8 +471,8 @@ def check_nhl():
                         "Date": game_date,
                         "Status": game['status']['detailedState'],
                         "Venue": game['venue']['name'],
-                        "Time": game['linescore']['currentPeriodTimeRemaining'],
-                        "Period": game['linescore']['currentPeriodOrdinal']
+                        "Time": PeriodTime,
+                        "Period": PeriodOrdinal
                     }
 
                     # nhl_games[game_pk].game_status = game['status']['abstractGameState']
