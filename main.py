@@ -6,6 +6,7 @@ import urllib.request
 import json
 import time
 import dateutil.parser
+import pandas as pd
 from threading import Timer
 from collections import OrderedDict
 import streamlit as st
@@ -62,10 +63,10 @@ def IceMaker(StatFrame):
 
     x = (x_co)
     y = (y_co)
-
+    ev = StatFrame['Event']
     print(x)
     print(y)
-
+    print(ev)
     # for index, value in x.items():
     #     if x[index] < 0:
     #         x[index] = -x[index]
@@ -100,6 +101,14 @@ def IceMaker(StatFrame):
     ax.set(xlim=(0, 100), ylim=(-42.5, 42.5))
     p = matplotlib.patches.Rectangle(xy=[0, -42.5], width=100, height=85, transform=ax.transData,
                                      facecolor="xkcd:white", alpha=0.3, zorder=-1)
+
+    def label_point(x,y,val,ax):
+        a = pd.concat({'x': x, 'y':y, 'val':val}, axis=1)
+        for i, point in a.iterrows():
+            ax.text(point['x']+0.02, point['y'], str(point['val']))
+
+    label_point(x,y,ev, plt.gca())
+
     for col in ax.collections:
         col.set_clip_path(p)
     # plt.axis('off')
@@ -133,7 +142,7 @@ class NHLTeams:
                  "Los Angeles Kings": "LAK",
                  "Minnesota Wild": "MIN",
                  "Montreal Canadiens": "MTL",
-                 "MontrÃ©al Canadiens": "MTL",
+                 "Montréal Canadiens": "MTL",
                  "New Jersey Devils": "NJD",
                  "Nashville Predators": "NSH",
                  "New York Islanders": "NYI",
@@ -468,6 +477,40 @@ def check_nhl():
                         live_feed_raw_json = response.read().decode('utf8')
                     live_feed_json = json.loads(live_feed_raw_json)
 
+                    stGameStatus.subheader(nhl_simple[game_pk]['Status'])
+
+                    stHomeScore.title(str(nhl_simple[game_pk]['HomeScore']))
+                    stAwayScore.title(str(nhl_simple[game_pk]['AwayScore']))
+
+                    stHomeTeam.header(nhl_simple[game_pk]['HomeTeam'])
+                    stAwayTeam.header(nhl_simple[game_pk]['AwayTeam'])
+                    stHomeLogo.image(Image.open('./TeamLogos/' + TeamIndex.get(nhl_simple[game_pk]['HomeTeam'])))
+                    stAwayLogo.image(Image.open('./TeamLogos/' + TeamIndex.get(nhl_simple[game_pk]['AwayTeam'])))
+
+                    stHomeShots.subheader("Shots " + str(nhl_simple[game_pk]['HomeShots']))
+                    stAwayShots.subheader("Shots " + str(nhl_simple[game_pk]['AwayShots']))
+
+                    if nhl_simple[game_pk]['Status'] == 'In Progress':
+                        if nhl_simple[game_pk]['HomePowerPlay']:
+                            stPPCheck.subheader(nhl_simple[game_pk]['HomeTeam'] + " Power Play")
+                        elif nhl_simple[game_pk]['AwayPowerPlay']:
+                            stPPCheck.subheader(nhl_simple[game_pk]['AwayTeam'] + " Power Play")
+                        else:
+                            stPPCheck.subheader("Even Strength")
+                    else:
+                        stPPCheck.subheader("")
+
+                    # stPeriod.header(nhl_simple[game_pk]['Period'] + " Period")
+                    stPeriod.markdown("<h1 style='text-align: center; color: red;'>" + nhl_simple[game_pk][
+                        'Period'] + " Period" + "</h1>", unsafe_allow_html=True)
+                    stGameTime.header(nhl_simple[game_pk]['Time'])
+                    stGameTime.markdown(
+                        "<h3 style='text-align: center; color: white;'>" + nhl_simple[game_pk]['Time'] + "</h3>",
+                        unsafe_allow_html=True)
+                    stVenue.subheader(nhl_simple[game_pk]['Venue'])
+
+
+
                     PlayCount = 0
 
                     game_plays[game_pk] = {}
@@ -502,6 +545,11 @@ def check_nhl():
                     LastPlay3 = dict()
                     LastPlay4 = dict()
                     LastPlay5 = dict()
+                    LastPlay6 = dict()
+                    LastPlay7 = dict()
+                    LastPlay8 = dict()
+                    LastPlay9 = dict()
+                    LastPlay10 = dict()
 
                     ## Initialize Descriptions
                     LastPlay1['Description'] = ""
@@ -509,16 +557,51 @@ def check_nhl():
                     LastPlay3['Description'] = ""
                     LastPlay4['Description'] = ""
                     LastPlay5['Description'] = ""
+                    LastPlay6['Description'] = ""
+                    LastPlay7['Description'] = ""
+                    LastPlay8['Description'] = ""
+                    LastPlay9['Description'] = ""
+                    LastPlay10['Description'] = ""
                     LastPlay1['Event'] = ""
                     LastPlay2['Event'] = ""
                     LastPlay3['Event'] = ""
                     LastPlay4['Event'] = ""
                     LastPlay5['Event'] = ""
+                    LastPlay6['Event'] = ""
+                    LastPlay7['Event'] = ""
+                    LastPlay8['Event'] = ""
+                    LastPlay9['Event'] = ""
+                    LastPlay10['Event'] = ""
                     LastPlay1['Time'] = ""
                     LastPlay2['Time'] = ""
                     LastPlay3['Time'] = ""
                     LastPlay4['Time'] = ""
                     LastPlay5['Time'] = ""
+                    LastPlay6['Time'] = ""
+                    LastPlay7['Time'] = ""
+                    LastPlay8['Time'] = ""
+                    LastPlay9['Time'] = ""
+                    LastPlay10['Time'] = ""
+                    LastPlay1['X'] = ""
+                    LastPlay2['X'] = ""
+                    LastPlay3['X'] = ""
+                    LastPlay4['X'] = ""
+                    LastPlay5['X'] = ""
+                    LastPlay6['X'] = ""
+                    LastPlay7['X'] = ""
+                    LastPlay8['X'] = ""
+                    LastPlay9['X'] = ""
+                    LastPlay10['X'] = ""
+                    LastPlay1['Y'] = ""
+                    LastPlay2['Y'] = ""
+                    LastPlay3['Y'] = ""
+                    LastPlay4['Y'] = ""
+                    LastPlay5['Y'] = ""
+                    LastPlay6['Y'] = ""
+                    LastPlay7['Y'] = ""
+                    LastPlay8['Y'] = ""
+                    LastPlay9['Y'] = ""
+                    LastPlay10['Y'] = ""
 
                     if PlayCount == 0:
                         LastPlay1['Description'] = "Game Not Started"
@@ -597,14 +680,25 @@ def check_nhl():
 
                     # Create Pandas DataFrame of Recent Events
 
-                    ######## WORK HERE, CREATE NUMPY ARRAY WITH INFORMATION FOR THE ICEMAKER
-                    PlayFrame = {'Play': ["Last Play", "2nd Last Play", "3rd Last Play", "4th Last Play", "5th Last Play", "6th Last Play", "7th Last Play", "8th Last Play", "9th Last Play", "10th Last Play"],
-                                 'Time': [LastPlay1['Time'], LastPlay2['Time'], LastPlay3['Time'], LastPlay4['Time'], LastPlay5['Time'], LastPlay6['Time'], LastPlay7['Time'], LastPlay8['Time'], LastPlay9['Time'], LastPlay10['Time']],
-                                 'Event': [LastPlay1['Event'], LastPlay2['Event'], LastPlay3['Event'], LastPlay4['Event'], LastPlay5['Event'], LastPlay6['Event'], LastPlay7['Event'], LastPlay8['Event'], LastPlay9['Event'], LastPlay10['Event']],
-                                 'Xco': [LastPlay1['X'], LastPlay2['X'], LastPlay3['X'], LastPlay4['X'], LastPlay5['X'], LastPlay6['X'], LastPlay7['X'], LastPlay8['X'], LastPlay9['X'], LastPlay10['X']],
-                                 'Yco': [LastPlay1['Y'], LastPlay2['Y'], LastPlay3['Y'], LastPlay4['Y'], LastPlay5['Y'], LastPlay6['Y'], LastPlay7['Y'], LastPlay8['Y'], LastPlay9['Y'], LastPlay10['Y']]
-                    }
 
+                    print("I got Here")
+                    ######## WORK HERE, CREATE NUMPY ARRAY WITH INFORMATION FOR THE ICEMAKER
+                    PlayFrame = {'Play': ["Last Play", "2nd Last Play", "3rd Last Play", "4th Last Play",
+                                          "5th Last Play", "6th Last Play", "7th Last Play", "8th Last Play",
+                                          "9th Last Play", "10th Last Play"],
+                                 'Time': [LastPlay1['Time'], LastPlay2['Time'], LastPlay3['Time'], LastPlay4['Time'],
+                                          LastPlay5['Time'], LastPlay6['Time'], LastPlay7['Time'], LastPlay8['Time'],
+                                          LastPlay9['Time'], LastPlay10['Time']],
+                                 'Event': [LastPlay1['Event'], LastPlay2['Event'], LastPlay3['Event'],
+                                           LastPlay4['Event'], LastPlay5['Event'], LastPlay6['Event'],
+                                           LastPlay7['Event'], LastPlay8['Event'], LastPlay9['Event'],
+                                           LastPlay10['Event']],
+                                 'Xco': [LastPlay1['X'], LastPlay2['X'], LastPlay3['X'], LastPlay4['X'], LastPlay5['X'],
+                                         LastPlay6['X'], LastPlay7['X'], LastPlay8['X'], LastPlay9['X'], LastPlay10['X']],
+                                 'Yco': [LastPlay1['Y'], LastPlay2['Y'], LastPlay3['Y'], LastPlay4['Y'], LastPlay5['Y'],
+                                         LastPlay6['Y'], LastPlay7['Y'], LastPlay8['Y'], LastPlay9['Y'], LastPlay10['Y']]
+                    }
+                    print("I got here too")
                     # PlayFrame = np.array([[LastPlay1['Time'],LastPlay1['Event'],LastPlay1['X'],LastPlay1['Y']],
                     #                      [LastPlay2['Time'],LastPlay2['Event'],LastPlay2['X'],LastPlay2['Y']],
                     #                      [LastPlay3['Time'],LastPlay3['Event'],LastPlay3['X'],LastPlay3['Y']],
@@ -613,37 +707,43 @@ def check_nhl():
 
                     stArena1.pyplot(IceMaker(PlayFrame))
 
-                    stGameStatus.subheader(nhl_simple[game_pk]['Status'])
+                    # stGameStatus.subheader(nhl_simple[game_pk]['Status'])
+                    #
+                    # stHomeScore.title(str(nhl_simple[game_pk]['HomeScore']))
+                    # stAwayScore.title(str(nhl_simple[game_pk]['AwayScore']))
+                    #
+                    # stHomeTeam.header(nhl_simple[game_pk]['HomeTeam'])
+                    # stAwayTeam.header(nhl_simple[game_pk]['AwayTeam'])
+                    # stHomeLogo.image(Image.open('./TeamLogos/' + TeamIndex.get(nhl_simple[game_pk]['HomeTeam'])))
+                    # stAwayLogo.image(Image.open('./TeamLogos/' + TeamIndex.get(nhl_simple[game_pk]['AwayTeam'])))
+                    #
+                    # stHomeShots.subheader("Shots " + str(nhl_simple[game_pk]['HomeShots']))
+                    # stAwayShots.subheader("Shots " + str(nhl_simple[game_pk]['AwayShots']))
+                    #
+                    # if nhl_simple[game_pk]['Status'] == 'In Progress':
+                    #     if nhl_simple[game_pk]['HomePowerPlay']:
+                    #         stPPCheck.subheader(nhl_simple[game_pk]['HomeTeam'] + " Power Play")
+                    #     elif nhl_simple[game_pk]['AwayPowerPlay']:
+                    #         stPPCheck.subheader(nhl_simple[game_pk]['AwayTeam'] + " Power Play")
+                    #     else:
+                    #         stPPCheck.subheader("Even Strength")
+                    # else:
+                    #     stPPCheck.subheader("")
+                    #
+                    # # stPeriod.header(nhl_simple[game_pk]['Period'] + " Period")
+                    # stPeriod.markdown("<h1 style='text-align: center; color: red;'>" + nhl_simple[game_pk][
+                    #     'Period'] + " Period" + "</h1>", unsafe_allow_html=True)
+                    # stGameTime.header(nhl_simple[game_pk]['Time'])
+                    # stGameTime.markdown(
+                    #     "<h3 style='text-align: center; color: white;'>" + nhl_simple[game_pk]['Time'] + "</h3>",
+                    #     unsafe_allow_html=True)
+                    # stVenue.subheader(nhl_simple[game_pk]['Venue'])
 
-                    stHomeScore.title(str(nhl_simple[game_pk]['HomeScore']))
-                    stAwayScore.title(str(nhl_simple[game_pk]['AwayScore']))
-
-                    stHomeTeam.header(nhl_simple[game_pk]['HomeTeam'])
-                    stAwayTeam.header(nhl_simple[game_pk]['AwayTeam'])
-                    stHomeLogo.image(Image.open('./TeamLogos/' + TeamIndex.get(nhl_simple[game_pk]['HomeTeam'])))
-                    stAwayLogo.image(Image.open('./TeamLogos/' + TeamIndex.get(nhl_simple[game_pk]['AwayTeam'])))
-
-                    stHomeShots.subheader("Shots " + str(nhl_simple[game_pk]['HomeShots']))
-                    stAwayShots.subheader("Shots " + str(nhl_simple[game_pk]['AwayShots']))
-
-                    if nhl_simple[game_pk]['Status'] == 'In Progress':
-                        if nhl_simple[game_pk]['HomePowerPlay']:
-                            stPPCheck.subheader(nhl_simple[game_pk]['HomeTeam'] + " Power Play")
-                        elif nhl_simple[game_pk]['AwayPowerPlay']:
-                            stPPCheck.subheader(nhl_simple[game_pk]['AwayTeam'] + " Power Play")
-                        else:
-                            stPPCheck.subheader("Even Strength")
-                    else:
-                        stPPCheck.subheader("")
-
-                    # stPeriod.header(nhl_simple[game_pk]['Period'] + " Period")
-                    stPeriod.markdown("<h1 style='text-align: center; color: red;'>" + nhl_simple[game_pk][
-                        'Period'] + " Period" + "</h1>", unsafe_allow_html=True)
-                    stGameTime.header(nhl_simple[game_pk]['Time'])
-                    stGameTime.markdown(
-                        "<h3 style='text-align: center; color: white;'>" + nhl_simple[game_pk]['Time'] + "</h3>",
-                        unsafe_allow_html=True)
-                    stVenue.subheader(nhl_simple[game_pk]['Venue'])
+                    # stLastPlay1.text(LastPlay1['Time'] + " " + LastPlay1['Event'] + ": " + LastPlay1['Description'])
+                    # stLastPlay2.text(LastPlay2['Time'] + " " + LastPlay2['Event'] + ": " + LastPlay2['Description'])
+                    # stLastPlay3.text(LastPlay3['Time'] + " " + LastPlay3['Event'] + ": " + LastPlay3['Description'])
+                    # stLastPlay4.text(LastPlay4['Time'] + " " + LastPlay4['Event'] + ": " + LastPlay4['Description'])
+                    # stLastPlay5.text(LastPlay5['Time'] + " " + LastPlay5['Event'] + ": " + LastPlay5['Description'])
                     #
         for k in list(nhl_games.keys()):
             d = nhl_games[k].time_delay()
