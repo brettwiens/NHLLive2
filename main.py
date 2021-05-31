@@ -17,49 +17,58 @@ import seaborn as sns
 MAX_DELAY = int(os.getenv('MAX_DELAY', 10))
 MIN_DELAY = int(os.getenv('MIN_DELAY', 10))
 
+st.set_page_config(layout='wide')
+st.sidebar.header("Select Team")
 
 NHL = os.getenv('NHL', 'true').lower() == 'true'
 
-st.set_page_config(layout='wide')
-
-st.sidebar.header("Select Team")
-TeamPicker = st.sidebar.selectbox("Select Team:", ["Vegas Golden Knights",
-    "Anaheim Ducks",
-                                                   "Arizona Coyotes",
-                                                   "Boston Bruins",
-                                                   "Buffalo Sabres",
-                                                   "Carolina Hurricanes",
-                                                   "Columbus Blue Jackets",
-                                                   "Calgary Flames",
-                                                   "Chicago Blackhawks",
-                                                   "Colorado Avalanche",
-                                                   "Dallas Stars",
-                                                   "Detroit Red Wings",
-                                                   "Edmonton Oilers",
-                                                   "Florida Panthers",
-                                                   "Los Angeles Kings",
-                                                   "Minnesota Wild",
-                                                   "Montreal Canadiens",
-                                                   "Montréal Canadiens",
-                                                   "New Jersey Devils",
-                                                   "Nashville Predators",
-                                                   "New York Islanders",
-                                                   "New York Rangers",
-                                                   "Ottawa Senators",
-                                                   "Philadelphia Flyers",
-                                                   "Pittsburgh Penguins",
-                                                   "San Jose Sharks",
-                                                   "St. Louis Blues",
-                                                   "Tampa Bay Lightning",
-                                                   "Toronto Maple Leafs",
-                                                   "Vancouver Canucks",
-                                                   "Vegas Golden Knights",
-                                                   "Winnipeg Jets",
-                                                   "Washington Capitals"])
-
 st.title("Game Statistics - Mini Skorboard")
+
+GoStatus = False
+
+stTeamPicker = st.sidebar.selectbox(label="Select Team:", options=('Anaheim Ducks',
+                                                                   'Arizona Coyotes',
+                                                                   'Boston Bruins',
+                                                                   'Buffalo Sabres',
+                                                                   'Carolina Hurricanes',
+                                                                   'Columbus Blue Jackets',
+                                                                   'Calgary Flames',
+                                                                   'Chicago Blackhawks',
+                                                                   'Colorado Avalanche',
+                                                                   'Dallas Stars',
+                                                                   'Detroit Red Wings',
+                                                                   'Edmonton Oilers',
+                                                                   'Florida Panthers',
+                                                                   'Los Angeles Kings',
+                                                                   'Minnesota Wild',
+                                                                   'Montréal Canadiens',
+                                                                   'New Jersey Devils',
+                                                                   'Nashville Predators',
+                                                                   'New York Islanders',
+                                                                   'New York Rangers',
+                                                                   'Ottawa Senators',
+                                                                   'Philadelphia Flyers',
+                                                                   'Pittsburgh Penguins',
+                                                                   'San Jose Sharks',
+                                                                   'St. Louis Blues',
+                                                                   'Tampa Bay Lightning',
+                                                                   'Toronto Maple Leafs',
+                                                                   'Vancouver Canucks',
+                                                                   'Vegas Golden Knights',
+                                                                   'Winnipeg Jets',
+                                                                   'Washington Capitals'))
+print(stTeamPicker)
+stGoButton = st.sidebar.button("Start")
+
+if stGoButton:
+    if GoStatus == False:
+        GoStatus = True
+    else:
+        GoStatus = False
+
+# stContinueCheck = st.sidebar.checkbox("Stop")
 st.write()
-st.write("-=-=-=-")
+st.markdown("---")
 col1, col2, col3 = st.beta_columns(3)
 with col1:
     stGameStatus = st.empty()
@@ -85,7 +94,7 @@ with col4:
     stAwayTeam = st.empty()
     stAwayShots = st.empty()
 
-st.write("-=-=-=-")
+st.markdown("---")
 col1, col2 = st.beta_columns(2)
 with col1:
     stLastPlay1 = st.empty()
@@ -95,6 +104,7 @@ with col1:
     stLastPlay5 = st.empty()
 with col2:
     stArena1 = st.empty()
+
 
 class NHLGame:
     def __init__(self, home, away, home_score, away_score, home_shots, away_shots, home_PP, away_PP, game_date):
@@ -115,6 +125,7 @@ class NHLGame:
             return min(MAX_DELAY, time_delta)
         # This means the game is over and we should get rid of it
         return False
+
 
 def IceMaker(StatFrame):
     StatTable = StatFrame[['X', 'Y']]
@@ -158,6 +169,7 @@ def IceMaker(StatFrame):
     # plt.axis('off')
     return fig
 
+
 class GamePlays:
     def __init__(self, result, x, y, team, period, time):
         self.result = result
@@ -166,6 +178,7 @@ class GamePlays:
         self.team = team
         self.period = period
         self.time = time
+
 
 class NHLTeams:
     team_dict = {"Anaheim Ducks": "ANA",
@@ -202,9 +215,14 @@ class NHLTeams:
                  "Washington Capitals": "WSH"
                  }
 
+
 class Team:
     def __init__(self, team_name, team_score, team_shots, team_PP, league="nhl"):
         self.team_name = team_name
+        self.team_score = team_score
+        self.team_shots = team_shots
+        self.team_PP = team_PP
+
     #     self.league = league
     #     if len(team_name) <= 3:
     #         self.team_abbr = team_name
@@ -322,6 +340,7 @@ TeamIndex = {
     'Carolina Hurricanes': 'CAR3.png',
     'Chicago Blackhawks': 'CHI3.png',
     'Columbus Blue Jackets': 'CBJ3.png',
+    'Colorado Avalanche': 'COL3.png',
     'Dallas Stars': 'DAL3.PNG',
     'Detroit Red Wings': 'DET3.png',
     'Edmonton Oilers': 'EDM3.png',
@@ -339,15 +358,17 @@ TeamIndex = {
     'San Jose Sharks': 'SJS3.png',
     'St. Louis Blues': 'STL3.png',
     'Tampa Bay Lightning': 'TBL3.png',
-    'Toronto Maple Leafs': "'TOR3.png'",
+    'Toronto Maple Leafs': 'TOR3.png',
     'Vancouver Canucks': 'VAN3.png',
     'Vegas Golden Knights': 'VGK3.png',
     'Washington Capitals': 'WSH3.png',
     'Winnipeg Jets': 'WPG3.png',
 }
 
+
 def check_nhl():
     # print("checking nhl")
+
     try:
         delay = MAX_DELAY
         with urllib.request.urlopen(
@@ -356,10 +377,11 @@ def check_nhl():
 
         json_data = json.loads(raw_json)
         for game in json_data['dates'][0]['games']:
-            print(game['teams']['away']['team']['name'])
-            print(game['teams']['home']['team']['name'])
-            print(TeamPicker)
-            if game['teams']['away']['team']['name'] == TeamPicker or game['teams']['home']['team']['name'] == TeamPicker:
+            # print(game['teams']['away']['team']['name'])
+            # print(game['teams']['home']['team']['name'])
+            # print(stTeamPicker)
+            if game['teams']['away']['team']['name'] == stTeamPicker or game['teams']['home']['team'][
+                'name'] == stTeamPicker:
                 # print("----------------------")
                 game_pk = game['gamePk']
                 # print(game_pk)
@@ -436,6 +458,7 @@ def check_nhl():
                         game_plays[game_pk][PlayCount] = {}
 
                         game_plays[game_pk][PlayCount]["Description"] = Play['result']['description']
+                        game_plays[game_pk][PlayCount]["Event"] = Play['result']['event']
                         game_plays[game_pk][PlayCount]["X"] = x_coord,
                         game_plays[game_pk][PlayCount]["Y"] = y_coord,
                         game_plays[game_pk][PlayCount]["Team"] = TeamCode,
@@ -450,36 +473,39 @@ def check_nhl():
                         LastPlay4 = dict()
                         LastPlay5 = dict()
 
+                        ## Initialize Descriptions
+                        LastPlay1['Description'] = ""
+                        LastPlay2['Description'] = ""
+                        LastPlay3['Description'] = ""
+                        LastPlay4['Description'] = ""
+                        LastPlay5['Description'] = ""
+                        LastPlay1['Event'] = ""
+                        LastPlay2['Event'] = ""
+                        LastPlay3['Event'] = ""
+                        LastPlay4['Event'] = ""
+                        LastPlay5['Event'] = ""
+                        LastPlay1['Time'] = ""
+                        LastPlay2['Time'] = ""
+                        LastPlay3['Time'] = ""
+                        LastPlay4['Time'] = ""
+                        LastPlay5['Time'] = ""
+
                         if PlayCount == 0:
                             LastPlay1['Description'] = "Game Not Started"
-                            LastPlay2['Description'] = ""
-                            LastPlay3['Description'] = ""
-                            LastPlay4['Description'] = ""
-                            LastPlay5['Description'] = ""
                         elif PlayCount == 1:
                             LastPlay1 = (game_plays[game_pk][PlayCount - 1])
-                            LastPlay2['Description'] = ""
-                            LastPlay3['Description'] = ""
-                            LastPlay4['Description'] = ""
-                            LastPlay5['Description'] = ""
                         elif PlayCount == 2:
                             LastPlay1 = (game_plays[game_pk][PlayCount - 1])
                             LastPlay2 = (game_plays[game_pk][PlayCount - 2])
-                            LastPlay3['Description'] = ""
-                            LastPlay4['Description'] = ""
-                            LastPlay5['Description'] = ""
                         elif PlayCount == 3:
                             LastPlay1 = (game_plays[game_pk][PlayCount - 1])
                             LastPlay2 = (game_plays[game_pk][PlayCount - 2])
                             LastPlay3 = (game_plays[game_pk][PlayCount - 3])
-                            LastPlay4['Description'] = ""
-                            LastPlay5['Description'] = ""
                         elif PlayCount == 4:
                             LastPlay1 = (game_plays[game_pk][PlayCount - 1])
                             LastPlay2 = (game_plays[game_pk][PlayCount - 2])
                             LastPlay3 = (game_plays[game_pk][PlayCount - 3])
                             LastPlay4 = (game_plays[game_pk][PlayCount - 4])
-                            LastPlay5['Description'] = ""
                         else:
                             LastPlay1 = (game_plays[game_pk][PlayCount - 1])
                             LastPlay2 = (game_plays[game_pk][PlayCount - 2])
@@ -487,13 +513,15 @@ def check_nhl():
                             LastPlay4 = (game_plays[game_pk][PlayCount - 4])
                             LastPlay5 = (game_plays[game_pk][PlayCount - 5])
 
-                        stLastPlay1.text(LastPlay1['Description'])
-                        stLastPlay2.text(LastPlay2['Description'])
-                        stLastPlay3.text(LastPlay3['Description'])
-                        stLastPlay4.text(LastPlay4['Description'])
-                        stLastPlay5.text(LastPlay5['Description'])
+                    stLastPlay1.text(LastPlay1['Time'] + " " + LastPlay1['Event'] + ": " + LastPlay1['Description'])
+                    stLastPlay2.text(LastPlay2['Time'] + " " + LastPlay2['Event'] + ": " + LastPlay2['Description'])
+                    stLastPlay3.text(LastPlay3['Time'] + " " + LastPlay3['Event'] + ": " + LastPlay3['Description'])
+                    stLastPlay4.text(LastPlay4['Time'] + " " + LastPlay4['Event'] + ": " + LastPlay4['Description'])
+                    stLastPlay5.text(LastPlay5['Time'] + " " + LastPlay5['Event'] + ": " + LastPlay5['Description'])
 
                     # Create Pandas DataFrame of Recent Events
+
+                    ######## WORK HERE, CREATE NUMPY ARRAY WITH INFORMATION FOR THE ICEMAKER
 
                     # stArena1.pyplot(IceMaker([0, 0]))
 
@@ -521,9 +549,12 @@ def check_nhl():
                         stPPCheck.subheader("")
 
                     # stPeriod.header(nhl_simple[game_pk]['Period'] + " Period")
-                    stPeriod.markdown("<h1 style='text-align: center; color: red;'>" + nhl_simple[game_pk]['Period'] + " Period" + "</h1>", unsafe_allow_html=True)
+                    stPeriod.markdown("<h1 style='text-align: center; color: red;'>" + nhl_simple[game_pk][
+                        'Period'] + " Period" + "</h1>", unsafe_allow_html=True)
                     stGameTime.header(nhl_simple[game_pk]['Time'])
-                    stGameTime.markdown("<h3 style='text-align: center; color: white;'>" + nhl_simple[game_pk]['Time'] + "</h3>", unsafe_allow_html=True)
+                    stGameTime.markdown(
+                        "<h3 style='text-align: center; color: white;'>" + nhl_simple[game_pk]['Time'] + "</h3>",
+                        unsafe_allow_html=True)
                     stVenue.subheader(nhl_simple[game_pk]['Venue'])
                     #
         for k in list(nhl_games.keys()):
@@ -542,10 +573,11 @@ def check_nhl():
         return MIN_DELAY
 
 
-while True:
-    delay_for_repeat = MAX_DELAY
-    if NHL:
-        delay_for_repeat = min(delay_for_repeat, check_nhl())
-    print("delaying for " + str(delay_for_repeat) + " seconds")
-    sys.stdout.flush()
-    time.sleep(delay_for_repeat)
+if stGoButton:
+    while GoStatus:
+        delay_for_repeat = MAX_DELAY
+        if NHL:
+            delay_for_repeat = min(delay_for_repeat, check_nhl())
+        print("delaying for " + str(delay_for_repeat) + " seconds")
+        sys.stdout.flush()
+        time.sleep(delay_for_repeat)
