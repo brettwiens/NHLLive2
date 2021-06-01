@@ -347,7 +347,7 @@ with col3:
     stVenue = st.empty()
 
 st.markdown("---")
-col1, col2, col3, col4, col5 = st.beta_columns((1, 2, 1, 1, 2))
+col1, col2, col3, col4, col5 = st.beta_columns((1, 1, 2, 1, 1))
 with col1:
     stHomeLogo = st.empty()
 with col2:
@@ -359,13 +359,13 @@ with col3:
     stGoalTable = st.empty()
     st.write("Shots")
     stShotTable = st.empty()
-
 with col4:
-    stAwayLogo = st.empty()
-with col5:
     stAwayScore = st.empty()
     stAwayTeam = st.empty()
     stAwayShots = st.empty()
+with col5:
+    stAwayLogo = st.empty()
+
 
 st.markdown("---")
 col1, col2 = st.beta_columns(2)
@@ -445,16 +445,24 @@ def check_nhl():
                 AwayPeriodShots = []
                 PeriodsCols = []
 
+                periodCounter = 1
                 # if 0 in game['linescore']['periods']:
                 for period in game['linescore']['periods']:
-                    # print(period)
-                    # PeriodsCols = PeriodsCols + [(str(int(period) + 1))]
+                    # print(period['home']['shotsOnGoal'])
+                    PeriodsCols = PeriodsCols + [periodCounter]
                     HomeShots = HomeShots + int(period['home']['shotsOnGoal'])
-                    # HomePeriodShots = HomePeriodShots + [period['home']['shotsOnGoal']]
+                    HomePeriodShots = HomePeriodShots + [int(period['home']['shotsOnGoal'])]
+                    HomePeriodGoals = HomePeriodGoals + [int(period['home']['goals'])]
                     AwayShots = AwayShots + int(period['away']['shotsOnGoal'])
-                    # AwayPeriodShots = AwayPeriodShots + [period['away']['shotsOnGoal']]
+                    AwayPeriodShots = AwayPeriodShots + [int(period['away']['shotsOnGoal'])]
+                    AwayPeriodGoals = AwayPeriodGoals + [int(period['home']['goals'])]
+                    periodCounter += 1
 
-                # stShotTable.write(pd.DataFrame(np.array((HomeShots,AwayShots)), columns=Periods))
+                print(HomePeriodShots + AwayPeriodShots)
+                ShotTable = pd.DataFrame(np.array([HomePeriodShots, AwayPeriodShots]), columns=PeriodsCols, index=[game['teams']['home']['team']['name'], game['teams']['away']['team']['name']])
+                GoalTable = pd.DataFrame(np.array([HomePeriodGoals, AwayPeriodGoals]), columns=PeriodsCols, index=[game['teams']['home']['team']['name'], game['teams']['away']['team']['name']])
+                stShotTable.write(ShotTable)
+                stGoalTable.write(GoalTable)
 
                 if game_pk not in nhl_games:
                     nhl_games[game_pk] = NHLGame(game['teams']['home']['team']['name'],
