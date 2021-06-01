@@ -61,12 +61,12 @@ def IceMaker(StatFrame):
     # x = StatTable['X']
     # y = StatTable['Y']
 
-    x = (x_co)
-    y = (y_co)
-    ev = StatFrame['Event']
-    print(x)
-    print(y)
-    print(ev)
+    x = pd.Series(x_co)
+    y = pd.Series(y_co)
+    ev = pd.Series(StatFrame['Label'])
+    # print(x)
+    # print(y)
+    # print(ev)
     # for index, value in x.items():
     #     if x[index] < 0:
     #         x[index] = -x[index]
@@ -84,7 +84,7 @@ def IceMaker(StatFrame):
     img = Image.open('NHLArena.png')
     plt.imshow(img, extent=ax_extent)
 
-    sns.set_style("white")
+    sns.set_style("dark")
     # ax = sns.kdeplot(x=x, y=y, cmap="icefire", fill=True, thresh=0.05, levels=100, zorder=2, alpha=0.5)
     # sns.scatterplot(x=x, y=y, s=50, alpha=1, hue=freq, palette="dark:salmon_r")
     sns.scatterplot(x=x, y=y, s=50, alpha=1, palette="dark:salmon_r")
@@ -102,16 +102,16 @@ def IceMaker(StatFrame):
     p = matplotlib.patches.Rectangle(xy=[0, -42.5], width=100, height=85, transform=ax.transData,
                                      facecolor="xkcd:white", alpha=0.3, zorder=-1)
 
-    def label_point(x,y,val,ax):
-        a = pd.concat({'x': x, 'y':y, 'val':val}, axis=1)
+    def label_point(x, y, val, ax):
+        a = pd.concat({'x': x, 'y': y, 'val': val}, axis=1)
         for i, point in a.iterrows():
             ax.text(point['x']+0.02, point['y'], str(point['val']))
 
-    label_point(x,y,ev, plt.gca())
+    label_point(x, y, ev, plt.gca())
 
     for col in ax.collections:
         col.set_clip_path(p)
-    # plt.axis('off')
+    plt.axis('off')
     return fig
 
 
@@ -287,9 +287,9 @@ for game in json_data['dates'][0]['games']:
     PlayingTeamList = PlayingTeamList + [str(game['teams']['home']['team']['name'])]
     PlayingTeamList = PlayingTeamList + [str(game['teams']['away']['team']['name'])]
 st.text(ToplineString)
-st.text(PlayingTeamList)
+# st.text(PlayingTeamList)
 
-st.title("Game Statistics - Mini Skorboard")
+# st.title("Game Statistics - Mini Skorboard")
 
 GoStatus = False
 
@@ -326,7 +326,6 @@ stTeamPicker = st.sidebar.selectbox(label="Select Team:", options=(PlayingTeamLi
 #                                                                    'Winnipeg Jets',
 #                                                                    'Washington Capitals'))
 
-print(stTeamPicker)
 stGoButton = st.sidebar.button("Start")
 
 if stGoButton:
@@ -336,7 +335,6 @@ if stGoButton:
         GoStatus = False
 
 # stContinueCheck = st.sidebar.checkbox("Stop")
-st.write()
 st.markdown("---")
 col1, col2, col3 = st.beta_columns(3)
 with col1:
@@ -348,8 +346,8 @@ with col2:
 with col3:
     stVenue = st.empty()
 
-# st.write("-=-=-=-")
-col1, col2, col3, col4 = st.beta_columns((1, 2, 1, 2))
+st.markdown("---")
+col1, col2, col3, col4, col5 = st.beta_columns((1, 2, 1, 1, 2))
 with col1:
     stHomeLogo = st.empty()
 with col2:
@@ -357,8 +355,14 @@ with col2:
     stHomeTeam = st.empty()
     stHomeShots = st.empty()
 with col3:
-    stAwayLogo = st.empty()
+    st.write("Goals")
+    stGoalTable = st.empty()
+    st.write("Shots")
+    stShotTable = st.empty()
+
 with col4:
+    stAwayLogo = st.empty()
+with col5:
     stAwayScore = st.empty()
     stAwayTeam = st.empty()
     stAwayShots = st.empty()
@@ -435,9 +439,22 @@ def check_nhl():
                 HomeShots = 0
                 AwayShots = 0
 
+                HomePeriodGoals = []
+                AwayPeriodGoals = []
+                HomePeriodShots = []
+                AwayPeriodShots = []
+                PeriodsCols = []
+
+                # if 0 in game['linescore']['periods']:
                 for period in game['linescore']['periods']:
-                    HomeShots = HomeShots + period['home']['shotsOnGoal']
-                    AwayShots = AwayShots + period['away']['shotsOnGoal']
+                    # print(period)
+                    # PeriodsCols = PeriodsCols + [(str(int(period) + 1))]
+                    HomeShots = HomeShots + int(period['home']['shotsOnGoal'])
+                    # HomePeriodShots = HomePeriodShots + [period['home']['shotsOnGoal']]
+                    AwayShots = AwayShots + int(period['away']['shotsOnGoal'])
+                    # AwayPeriodShots = AwayPeriodShots + [period['away']['shotsOnGoal']]
+
+                # stShotTable.write(pd.DataFrame(np.array((HomeShots,AwayShots)), columns=Periods))
 
                 if game_pk not in nhl_games:
                     nhl_games[game_pk] = NHLGame(game['teams']['home']['team']['name'],
@@ -457,7 +474,11 @@ def check_nhl():
                         PeriodTime = "PreGame"
                         PeriodOrdinal = "PreGame"
 
-                    st.write(PeriodTime)
+                    # stGameTime.markdown(
+                    #     "<h3 style='text-align: center; color: white;'>" + PeriodTime + "</h3>",
+                    #     unsafe_allow_html=True)
+
+                    stGameTime.write(PeriodTime)
 
                     nhl_simple[game_pk] = {
                         "HomeTeam": game['teams']['home']['team']['name'],
@@ -517,12 +538,12 @@ def check_nhl():
                         stPPCheck.subheader("")
 
                     # stPeriod.header(nhl_simple[game_pk]['Period'] + " Period")
-                    stPeriod.markdown("<h1 style='text-align: center; color: red;'>" + nhl_simple[game_pk][
+                    stPeriod.markdown("<h2 style='text-align: left; color: red;'>" + nhl_simple[game_pk][
                         'Period'] + " Period" + "</h1>", unsafe_allow_html=True)
-                    stGameTime.header(nhl_simple[game_pk]['Time'])
-                    stGameTime.markdown(
-                        "<h3 style='text-align: center; color: white;'>" + nhl_simple[game_pk]['Time'] + "</h3>",
-                        unsafe_allow_html=True)
+                    # stGameTime.header(nhl_simple[game_pk]['Time'])
+                    # stGameTime.markdown(
+                    #     "<h3 style='text-align: center; color: white;'>" + nhl_simple[game_pk]['Time'] + "</h3>",
+                    #     unsafe_allow_html=True)
                     stVenue.subheader(nhl_simple[game_pk]['Venue'])
 
 
@@ -697,7 +718,6 @@ def check_nhl():
                     # Create Pandas DataFrame of Recent Events
 
 
-                    print("I got Here")
                     ######## WORK HERE, CREATE NUMPY ARRAY WITH INFORMATION FOR THE ICEMAKER
                     PlayFrame = {'Play': ["Last Play", "2nd Last Play", "3rd Last Play", "4th Last Play",
                                           "5th Last Play", "6th Last Play", "7th Last Play", "8th Last Play",
@@ -709,12 +729,26 @@ def check_nhl():
                                            LastPlay4['Event'], LastPlay5['Event'], LastPlay6['Event'],
                                            LastPlay7['Event'], LastPlay8['Event'], LastPlay9['Event'],
                                            LastPlay10['Event']],
+                                 'Team': [LastPlay1['Team'], LastPlay2['Team'], LastPlay3['Team'],
+                                           LastPlay4['Team'], LastPlay5['Team'], LastPlay6['Team'],
+                                           LastPlay7['Team'], LastPlay8['Team'], LastPlay9['Team'],
+                                           LastPlay10['Team']],
+                                 'Label': [str(LastPlay1['Team'][0]) + ":" + str(LastPlay1['Event']),
+                                           str(LastPlay2['Team'][0]) + ":" + str(LastPlay2['Event']),
+                                           str(LastPlay3['Team'][0]) + ":" + str(LastPlay3['Event']),
+                                           str(LastPlay4['Team'][0]) + ":" + str(LastPlay4['Event']),
+                                           str(LastPlay5['Team'][0]) + ":" + str(LastPlay5['Event']),
+                                           str(LastPlay6['Team'][0]) + ":" + str(LastPlay6['Event']),
+                                           str(LastPlay7['Team'][0]) + ":" + str(LastPlay7['Event']),
+                                           str(LastPlay8['Team'][0]) + ":" + str(LastPlay8['Event']),
+                                           str(LastPlay9['Team'][0]) + ":" + str(LastPlay9['Event']),
+                                           str(LastPlay10['Team'][0]) + ":" + str(LastPlay10['Event'])],
                                  'Xco': [LastPlay1['X'], LastPlay2['X'], LastPlay3['X'], LastPlay4['X'], LastPlay5['X'],
                                          LastPlay6['X'], LastPlay7['X'], LastPlay8['X'], LastPlay9['X'], LastPlay10['X']],
                                  'Yco': [LastPlay1['Y'], LastPlay2['Y'], LastPlay3['Y'], LastPlay4['Y'], LastPlay5['Y'],
                                          LastPlay6['Y'], LastPlay7['Y'], LastPlay8['Y'], LastPlay9['Y'], LastPlay10['Y']]
                     }
-                    print("I got here too")
+
                     # PlayFrame = np.array([[LastPlay1['Time'],LastPlay1['Event'],LastPlay1['X'],LastPlay1['Y']],
                     #                      [LastPlay2['Time'],LastPlay2['Event'],LastPlay2['X'],LastPlay2['Y']],
                     #                      [LastPlay3['Time'],LastPlay3['Event'],LastPlay3['X'],LastPlay3['Y']],
