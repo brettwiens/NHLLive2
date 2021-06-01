@@ -334,6 +334,8 @@ if stGoButton:
     else:
         GoStatus = False
 
+## UI
+
 # stContinueCheck = st.sidebar.checkbox("Stop")
 st.markdown("---")
 col1, col2, col3 = st.beta_columns(3)
