@@ -338,7 +338,7 @@ if stGoButton:
 
 # stContinueCheck = st.sidebar.checkbox("Stop")
 st.markdown("---")
-col1, col2, col3 = st.beta_columns(3)
+col1, col2, col3 = st.columns(3)
 with col1:
     stGameStatus = st.empty()
 with col2:
@@ -349,7 +349,7 @@ with col3:
     stVenue = st.empty()
 
 st.markdown("---")
-col1, col2, col3, col4, col5 = st.beta_columns((1, 1, 2, 1, 1))
+col1, col2, col3, col4, col5 = st.columns((1, 1, 2, 1, 1))
 with col1:
     stHomeLogo = st.empty()
 with col2:
@@ -370,7 +370,7 @@ with col5:
 
 
 st.markdown("---")
-col1, col2 = st.beta_columns(2)
+col1, col2 = st.columns(2)
 with col1:
     stLastPlay1 = st.empty()
     stLastPlay2 = st.empty()
